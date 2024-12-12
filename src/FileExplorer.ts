@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import axios, { AxiosInstance } from 'axios';
+import path = require('path');
+const fs = require('fs');
 
 export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, vscode.FileSystemProvider {
     private _onDidChangeTreeData: vscode.EventEmitter<FileItem | undefined | null> = new vscode.EventEmitter<FileItem | undefined | null>();
@@ -79,17 +81,40 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
 
         try {
             const fileName = filePath.split('/').pop() || 'untitled';
-            const uri = vscode.Uri.parse(`jupyter-remote:/${filePath}`);
+            const content = await this.fetchFileContent(filePath);
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
-            // Open the document with the custom URI
-            const document = await vscode.workspace.openTextDocument(uri);
+            if (!workspaceFolder) {
+                vscode.window.showErrorMessage('Workspace folder is undefined. Please set your workspace');
+                return;
+            }
+
+            const localFilePath = workspaceFolder ? `${workspaceFolder}${path.sep}${filePath.replace(/\//g, path.sep)}` : filePath.replace(/\//g, path.sep);
+            vscode.window.showErrorMessage(localFilePath);
+
+            const dirPath = path.dirname(localFilePath);
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath, { recursive: true });
+            }
+            vscode.window.showErrorMessage(content);
+
+            fs.writeFileSync(localFilePath, content);
+
+              // Open the document with the custom URI
+            const document = await vscode.workspace.openTextDocument(localFilePath);
+            vscode.Uri.parse(`vscode-notebook-cell:${localFilePath}`);
+            
             await vscode.window.showTextDocument(document);
 
             // Set the file name and language
             await vscode.languages.setTextDocumentLanguage(document, this.getLanguageId(fileName));
 
         } catch (error) {
-            vscode.window.showErrorMessage('Failed to open file.');
+            let errorMessage = 'Failed to open file.';
+            if (error instanceof Error) {
+                errorMessage += ` Error: ${error.message}`;
+            }
+            vscode.window.showErrorMessage(errorMessage);
         }
     }
 
@@ -101,7 +126,11 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         const apiUrl = `api/contents/${filePath}`;
         try {
             const response = await this.axiosInstance.get(apiUrl);
-            return response.data.content;
+
+            //vscode.window.showErrorMessage('succeeded to get content');
+            vscode.window.showErrorMessage( String(response.status) );
+            return JSON.stringify( response.data['content'] );
+            
         } catch (error) {
             console.error('Failed to fetch file content:', error);
             throw new Error('Failed to fetch file content from Jupyter Server.');
