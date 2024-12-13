@@ -16,7 +16,7 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
 
     constructor() {
-        // Initialize with default values or prompt the user
+        
     }
 
     async setConnection(url: string, token: string, remotePath: string) {
