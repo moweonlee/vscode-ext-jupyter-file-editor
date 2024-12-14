@@ -159,8 +159,7 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         }
 
         try {
-
-            const normalizedFilePath = filePath.replace(/\\/g, '/');
+            const normalizedFilePath = `${this.remotePath}/${path.basename(filePath).replace(/\\/g, '/')}`;
             const apiUrl = `${this.jupyterServerUrl}/api/contents/${normalizedFilePath}?token=${this.jupyterToken}`;
             vscode.window.showInformationMessage(`File saved to Jupyter Server. Path: ${filePath}, API URL: ${apiUrl}`);
             await this.axiosInstance.put(apiUrl, {
@@ -168,6 +167,8 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
                 type: 'file',
                 format: 'text'
             });
+
+            this.refresh();
             
         } catch (error) {
             let errorMessage = 'Failed to save file to Jupyter Server.';
