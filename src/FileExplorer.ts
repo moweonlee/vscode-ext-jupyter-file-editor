@@ -10,10 +10,12 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
     private jupyterServerUrl: string = '';
     private jupyterToken: string = '';
     private remotePath: string = '/';
+    private currentPath: string ='';
     private axiosInstance: AxiosInstance | null = null;
 
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
+    
 
     constructor() {
         
@@ -45,13 +47,15 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
     }
 
     async getChildren(element?: FileItem): Promise<FileItem[]> {
+
         if (!this.axiosInstance) {
             vscode.window.showErrorMessage('Not connected to Jupyter Server.');
             return [];
         }
 
-        const path = element ? element.uri : this.remotePath;
-        const apiUrl = `api/contents/${path}`;
+        const currentPath = element ? element.uri : this.remotePath;
+        this.currentPath = currentPath;
+        const apiUrl = `api/contents/${currentPath}`;
 
         try {
             const response = await this.axiosInstance.get(apiUrl);
@@ -159,7 +163,13 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         }
 
         try {
-            const normalizedFilePath = `${this.remotePath}/${path.basename(filePath).replace(/\\/g, '/')}`;
+            let normalizedFilePath: string;
+            if (this.currentPath) {
+                normalizedFilePath = `${this.currentPath}/${path.basename(filePath).replace(/\\/g, '/')}`;
+            } else {
+                normalizedFilePath = `${this.remotePath}/${path.basename(filePath).replace(/\\/g, '/')}`;
+            }
+            
             const apiUrl = `${this.jupyterServerUrl}/api/contents/${normalizedFilePath}?token=${this.jupyterToken}`;
             vscode.window.showInformationMessage(`File saved to Jupyter Server. Path: ${filePath}, API URL: ${apiUrl}`);
             await this.axiosInstance.put(apiUrl, {

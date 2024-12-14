@@ -5,6 +5,17 @@ export async function activate(context: vscode.ExtensionContext) {
     const fileExplorerProvider = new FileExplorerProvider();
     const jupyterContentProvider = new JupyterContentProvider(fileExplorerProvider);
     const treeView = vscode.window.createTreeView('jupyterFileExplorer', { treeDataProvider: fileExplorerProvider });
+    const refreshCommand = vscode.commands.registerCommand('jupyterFileExplorer.refresh', () => {
+        fileExplorerProvider.refresh();
+    });
+
+    context.subscriptions.push(refreshCommand);
+
+    treeView.onDidChangeVisibility(e => {
+        if (e.visible) {
+            fileExplorerProvider.refresh();
+        }
+    });
 
     let connectDisposable = vscode.commands.registerCommand('extension.connectJupyter', async () => {
         await connectToJupyter(fileExplorerProvider, jupyterContentProvider);
