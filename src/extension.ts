@@ -22,7 +22,11 @@ export async function activate(context: vscode.ExtensionContext) {
     const sendToCommand = vscode.commands.registerCommand('extension.sendToJupyter', (uri: vscode.Uri) => {
         // 여기서 선택한 파일을 처리하는 로직을 작성
         vscode.window.showInformationMessage(`Sending file: ${uri.fsPath}`);
+        
         // 예를 들어, 파일을 다른 시스템으로 전송하거나, 특정 작업을 수행할 수 있습니다.
+        const content = new Uint8Array(); // Provide appropriate content
+        const options = { create: true, overwrite: true }; // Set options as needed
+        fileExplorerProvider.writeFile(uri, content, options);
     });
 
 
