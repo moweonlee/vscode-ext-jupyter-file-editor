@@ -159,15 +159,28 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         }
 
         try {
-            const apiUrl = `api/contents/${filePath}`;
+
+            const normalizedFilePath = filePath.replace(/\\/g, '/');
+            const apiUrl = `${this.jupyterServerUrl}/api/contents/${normalizedFilePath}?token=${this.jupyterToken}`;
+            vscode.window.showInformationMessage(`File saved to Jupyter Server. Path: ${filePath}, API URL: ${apiUrl}`);
             await this.axiosInstance.put(apiUrl, {
                 content,
                 type: 'file',
                 format: 'text'
             });
-            vscode.window.showInformationMessage('File saved to Jupyter Server.');
+            
         } catch (error) {
-            vscode.window.showErrorMessage('Failed to save file to Jupyter Server.');
+            let errorMessage = 'Failed to save file to Jupyter Server.';
+            if (axios.isAxiosError(error)) {
+                errorMessage += ` Error: ${error.message}`;
+                if (error.response) {
+                    errorMessage += ` Status: ${error.response.status}`;
+                    errorMessage += ` Data: ${JSON.stringify(error.response.data)}`;
+                }
+            } else {
+                errorMessage += ` ${error}`;
+            }
+            vscode.window.showErrorMessage(errorMessage);
         }
     }
 
