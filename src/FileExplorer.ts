@@ -93,18 +93,29 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
                 return;
             }
 
-            const localFilePath = workspaceFolder ? `${workspaceFolder}${path.sep}${filePath.replace(/\//g, path.sep)}` : filePath.replace(/\//g, path.sep);
-            vscode.window.showErrorMessage(localFilePath);
-
+            const localFilePath = `${workspaceFolder}${path.sep}${fileName}`;
             const dirPath = path.dirname(localFilePath);
+
             if (!fs.existsSync(dirPath)) {
                 fs.mkdirSync(dirPath, { recursive: true });
             }
-            vscode.window.showErrorMessage(content);
+
+            if (fs.existsSync(localFilePath)) {
+                const overwrite = await vscode.window.showWarningMessage(
+                    `File ${localFilePath} already exists. Do you want to overwrite it?`,
+                    { modal: true },
+                    'Yes', 'No'
+                );
+
+                if (overwrite !== 'Yes') {
+                    vscode.window.showInformationMessage('File open operation cancelled.');
+                    return;
+                }
+            }
 
             fs.writeFileSync(localFilePath, content);
 
-              // Open the document with the custom URI
+            // Open the document with the custom URI
             const document = await vscode.workspace.openTextDocument(localFilePath);
             vscode.Uri.parse(`vscode-notebook-cell:${localFilePath}`);
             
@@ -133,7 +144,7 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
 
             //vscode.window.showErrorMessage('succeeded to get content');
             vscode.window.showErrorMessage( String(response.status) );
-            return JSON.stringify( response.data['content'] );
+            return response.data['content'];
             
         } catch (error) {
             console.error('Failed to fetch file content:', error);
@@ -171,7 +182,29 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
             }
             
             const apiUrl = `${this.jupyterServerUrl}/api/contents/${normalizedFilePath}?token=${this.jupyterToken}`;
-            vscode.window.showInformationMessage(`File saved to Jupyter Server. Path: ${filePath}, API URL: ${apiUrl}`);
+
+            try {
+                // Check if the file already exists
+                await this.axiosInstance.get(apiUrl);
+                // If the file exists, ask the user if they want to overwrite it
+                const overwrite = await vscode.window.showWarningMessage(
+                    `File ${normalizedFilePath} already exists on the Jupyter Server. Do you want to overwrite it?`,
+                    { modal: true },
+                    'Yes', 'No'
+                );
+
+                if (overwrite !== 'Yes') {
+                    vscode.window.showInformationMessage('File save operation cancelled.');
+                    return;
+                }
+            } catch (error) {
+                if (axios.isAxiosError(error) && error.response?.status !== 404) {
+                    throw error;
+                }
+                // If the error is 404, it means the file does not exist, so we can proceed
+            }
+
+            vscode.window.showInformationMessage(`File saved to Jupyter Server. Path: ${filePath}, API URL: ${apiUrl}, Content: ${content}`);
             await this.axiosInstance.put(apiUrl, {
                 content,
                 type: 'file',

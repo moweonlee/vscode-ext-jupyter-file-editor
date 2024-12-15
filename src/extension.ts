@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { FileExplorerProvider, JupyterContentProvider } from './FileExplorer';
+const fs = require('fs');
 
 export async function activate(context: vscode.ExtensionContext) {
     const fileExplorerProvider = new FileExplorerProvider();
@@ -35,7 +36,18 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(`Sending file: ${uri.fsPath}`);
         
         // 예를 들어, 파일을 다른 시스템으로 전송하거나, 특정 작업을 수행할 수 있습니다.
-        const content = new Uint8Array(); // Provide appropriate content
+        //const content = new Uint8Array(); // Provide appropriate content
+        let content: Uint8Array;
+        try {
+            content = fs.readFileSync(uri.fsPath);
+        } catch (error) {
+            if (error instanceof Error) {
+                vscode.window.showErrorMessage(`Failed to read file: ${error.message}`);
+            } else {
+                vscode.window.showErrorMessage('Failed to read file: Unknown error');
+            }
+            return;
+        }
         const options = { create: true, overwrite: true }; // Set options as needed
         fileExplorerProvider.writeFile(uri, content, options);
     });
