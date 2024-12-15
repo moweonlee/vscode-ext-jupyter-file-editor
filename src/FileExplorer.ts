@@ -86,6 +86,9 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         try {
             const fileName = filePath.split('/').pop() || 'untitled';
             const content = await this.fetchFileContent(filePath);
+
+            vscode.window.showInformationMessage( content );
+
             const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
             if (!workspaceFolder) {
@@ -94,11 +97,11 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
             }
 
             const localFilePath = `${workspaceFolder}${path.sep}${fileName}`;
-            const dirPath = path.dirname(localFilePath);
 
-            if (!fs.existsSync(dirPath)) {
-                fs.mkdirSync(dirPath, { recursive: true });
-            }
+            //const dirPath = path.dirname(localFilePath);
+            //if (!fs.existsSync(dirPath)) {
+            //   fs.mkdirSync(dirPath, { recursive: true });
+            //}
 
             if (fs.existsSync(localFilePath)) {
                 const overwrite = await vscode.window.showWarningMessage(
@@ -113,7 +116,9 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
                 }
             }
 
-            fs.writeFileSync(localFilePath, content);
+            const contentToWrite = typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
+
+            fs.writeFileSync(localFilePath, contentToWrite);
 
             // Open the document with the custom URI
             const document = await vscode.workspace.openTextDocument(localFilePath);
@@ -141,9 +146,6 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         const apiUrl = `api/contents/${filePath}`;
         try {
             const response = await this.axiosInstance.get(apiUrl);
-
-            //vscode.window.showErrorMessage('succeeded to get content');
-            vscode.window.showErrorMessage( String(response.status) );
             return response.data['content'];
             
         } catch (error) {

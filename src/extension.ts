@@ -10,6 +10,8 @@ export async function activate(context: vscode.ExtensionContext) {
         fileExplorerProvider.refresh();
     });
 
+
+    
     context.subscriptions.push(refreshCommand);
 
     treeView.onDidChangeVisibility(e => {
@@ -56,11 +58,6 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(connectDisposable, openFileDisposable);
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('jupyter-remote', jupyterContentProvider));
     context.subscriptions.push(sendToCommand);
-
-    
-    
-
-
 
     // Automatically attempt to connect to Jupyter on activation
     await connectToJupyter(fileExplorerProvider, jupyterContentProvider);
