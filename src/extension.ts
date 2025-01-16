@@ -43,6 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    vscode.commands.registerCommand('extension.refreshJupyterFiles', () => {
+        fileExplorerProvider.refresh();
+    });
+
     let openFileDisposable = vscode.commands.registerCommand('jupyterFileExplorer.openFile', (filePath: string) => {
         fileExplorerProvider.openFile(filePath);
     });

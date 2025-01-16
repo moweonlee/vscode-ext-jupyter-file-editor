@@ -27,10 +27,24 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "menus": {
+      "view/title": [
+          {
+              "command": "extension.refreshJupyterFiles",
+              "when": "view == jupyterFileExplorer",
+              "group": "navigation"
+          }
+      ]
+    },
     "commands": [
       {
         "command": "extension.connectJupyter",
         "title": "Connect to Jupyter Server"
+      },
+      {
+        "command": "extension.refreshJupyterFiles",
+        "title": "Refresh Jupyter Files",
+        "category": "Jupyter"
       }
     ],
     "views": {
