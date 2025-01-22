@@ -274,7 +274,7 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
     }
 }
 
-class FileItem extends vscode.TreeItem {
+export class FileItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
         public readonly collapsible: boolean,
@@ -285,11 +285,14 @@ class FileItem extends vscode.TreeItem {
         this.description = this.uri;
 
         if (!collapsible) {
+            /*
             this.command = {
                 command: 'jupyterFileExplorer.openFile',
                 title: 'Open File',
                 arguments: [this.uri]
             };
+            */
+            this.contextValue = 'fileItem'; // 컨텍스트 값 추가
         }
     }
 }

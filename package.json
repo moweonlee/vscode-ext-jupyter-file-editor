@@ -41,6 +41,13 @@
           "group": "primary",
           "label": "Send to Jupyter"
         }
+      ],
+      "view/item/context": [
+        {
+          "command": "jupyterFileExplorer.openFile",
+          "when": "view == jupyterFileExplorer && viewItem == fileItem",
+          "group": "inline"
+        }
       ]
     },
     "commands": [
@@ -56,6 +63,11 @@
         "command": "extension.refreshJupyterFiles",
         "title": "Refresh Jupyter Files",
         "category": "Jupyter"
+      },
+      {
+        "command": "jupyterFileExplorer.openFile",
+        "title": "Open File",
+        "category": "File Explorer"
       }
     ],
     "views": {

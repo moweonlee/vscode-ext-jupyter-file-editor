@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FileExplorerProvider, JupyterContentProvider } from './FileExplorer';
+import { FileExplorerProvider, JupyterContentProvider, FileItem } from './FileExplorer';
 const fs = require('fs');
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -28,8 +28,9 @@ export async function activate(context: vscode.ExtensionContext) {
         fileExplorerProvider.refresh();
     });
 
-    let openFileDisposable = vscode.commands.registerCommand('jupyterFileExplorer.openFile', (filePath: string) => {
-        fileExplorerProvider.openFile(filePath);
+    let openFileDisposable = vscode.commands.registerCommand('jupyterFileExplorer.openFile', (fileItem: FileItem) => {
+        vscode.window.showInformationMessage(`Sending file: ${fileItem.uri}`);
+        fileExplorerProvider.openFile(fileItem.uri);
     });
 
     // Register the FileSystemProvider
