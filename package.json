@@ -47,6 +47,11 @@
           "command": "jupyterFileExplorer.openFile",
           "when": "view == jupyterFileExplorer && viewItem == fileItem",
           "group": "inline"
+        },
+        {
+          "command": "jupyterFileExplorer.deleteFile",
+          "when": "view == jupyterFileExplorer && viewItem == fileItem",
+          "group": "inline"
         }
       ]
     },
@@ -67,6 +72,12 @@
       {
         "command": "jupyterFileExplorer.openFile",
         "title": "Open File",
+        "category": "File Explorer"
+      }
+      ,
+      {
+        "command": "jupyterFileExplorer.deleteFile",
+        "title": "Delete File",
         "category": "File Explorer"
       }
     ],

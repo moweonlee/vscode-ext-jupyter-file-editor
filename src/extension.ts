@@ -33,6 +33,11 @@ export async function activate(context: vscode.ExtensionContext) {
         fileExplorerProvider.openFile(fileItem.uri);
     });
 
+    let deleteFileDisposable = vscode.commands.registerCommand('jupyterFileExplorer.deleteFile', (fileItem: FileItem) => {
+        vscode.window.showInformationMessage(`Deleting file: ${fileItem.uri}`);
+        fileExplorerProvider.deleteFile(fileItem.uri);
+    });
+
     // Register the FileSystemProvider
     context.subscriptions.push(vscode.workspace.registerFileSystemProvider('jupyter-remote', fileExplorerProvider, { 
         isCaseSensitive: true
@@ -59,8 +64,9 @@ export async function activate(context: vscode.ExtensionContext) {
         fileExplorerProvider.writeFile(uri, content, options);
     });
 
-
-    context.subscriptions.push(connectDisposable, openFileDisposable);
+    context.subscriptions.push(connectDisposable);
+    context.subscriptions.push(openFileDisposable);
+    context.subscriptions.push(deleteFileDisposable);
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('jupyter-remote', jupyterContentProvider));
     context.subscriptions.push(sendToCommand);
 

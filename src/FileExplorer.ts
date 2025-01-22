@@ -77,6 +77,44 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
         }
     }
 
+    async deleteFile(filePath: string) {
+        if (!this.axiosInstance) {
+            vscode.window.showErrorMessage('Not connected to Jupyter Server.');
+            return;
+        }
+
+        const confirm = await vscode.window.showWarningMessage(
+            `Are you sure you want to delete the file ${filePath}?`,
+            { modal: true },
+            'Yes', 'No'
+        );
+
+        if (confirm !== 'Yes') {
+            vscode.window.showInformationMessage('File delete operation cancelled.');
+            return;
+        }
+
+        try {
+            const apiUrl = `api/contents/${filePath}`;
+            await this.axiosInstance.delete(apiUrl);
+            vscode.window.showInformationMessage(`File ${filePath} deleted successfully.`);
+            this.refresh();
+        } catch (error) {
+            let errorMessage = 'Failed to delete file from Jupyter Server.';
+            if (axios.isAxiosError(error)) {
+                errorMessage += ` Error: ${error.message}`;
+                if (error.response) {
+                    errorMessage += ` Status: ${error.response.status}`;
+                    errorMessage += ` Data: ${JSON.stringify(error.response.data)}`;
+                }
+            } else {
+                errorMessage += ` ${error}`;
+            }
+            vscode.window.showErrorMessage(errorMessage);
+        }
+    }
+
+    
     async openFile(filePath: string) {
         if (!this.axiosInstance) {
             vscode.window.showErrorMessage('Not connected to Jupyter Server.');
