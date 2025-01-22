@@ -162,8 +162,7 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
             const document = await vscode.workspace.openTextDocument(localFilePath);
             vscode.Uri.parse(`vscode-notebook-cell:${localFilePath}`);
             
-            //await vscode.window.showTextDocument(document);
-            //await vscode.window.showTextDocument(document);
+            vscode.window.showInformationMessage(`Download completed in ${localFilePath}`);
 
             // Set the file name and language
             await vscode.languages.setTextDocumentLanguage(document, this.getLanguageId(fileName));
