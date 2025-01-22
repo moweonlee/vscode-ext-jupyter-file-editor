@@ -46,12 +46,12 @@
         {
           "command": "jupyterFileExplorer.openFile",
           "when": "view == jupyterFileExplorer && viewItem == fileItem",
-          "group": "inline"
+          "group": "popup"
         },
         {
           "command": "jupyterFileExplorer.deleteFile",
           "when": "view == jupyterFileExplorer && viewItem == fileItem",
-          "group": "inline"
+          "group": "popup"
         }
       ]
     },
