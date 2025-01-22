@@ -29,12 +29,10 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
     let openFileDisposable = vscode.commands.registerCommand('jupyterFileExplorer.openFile', (fileItem: FileItem) => {
-        vscode.window.showInformationMessage(`Sending file: ${fileItem.uri}`);
         fileExplorerProvider.openFile(fileItem.uri);
     });
 
     let deleteFileDisposable = vscode.commands.registerCommand('jupyterFileExplorer.deleteFile', (fileItem: FileItem) => {
-        vscode.window.showInformationMessage(`Deleting file: ${fileItem.uri}`);
         fileExplorerProvider.deleteFile(fileItem.uri);
     });
 
