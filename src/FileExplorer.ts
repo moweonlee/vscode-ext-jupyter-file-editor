@@ -222,26 +222,15 @@ export class FileExplorerProvider implements vscode.TreeDataProvider<FileItem>, 
             }
             
             const apiUrl = `${this.jupyterServerUrl}/api/contents/${normalizedFilePath}?token=${this.jupyterToken}`;
+            const confirm = await vscode.window.showWarningMessage(
+                `Are you sure you want to save the file?\nLocal Path: ${filePath}\nRemote Path: ${normalizedFilePath}`,
+                { modal: true },
+                'Yes', 'No'
+            );
 
-            try {
-                // Check if the file already exists
-                await this.axiosInstance.get(apiUrl);
-                // If the file exists, ask the user if they want to overwrite it
-                const overwrite = await vscode.window.showWarningMessage(
-                    `File ${normalizedFilePath} already exists on the Jupyter Server. Do you want to overwrite it?`,
-                    { modal: true },
-                    'Yes', 'No'
-                );
-
-                if (overwrite !== 'Yes') {
-                    vscode.window.showInformationMessage('File save operation cancelled.');
-                    return;
-                }
-            } catch (error) {
-                if (axios.isAxiosError(error) && error.response?.status !== 404) {
-                    throw error;
-                }
-                // If the error is 404, it means the file does not exist, so we can proceed
+            if (confirm !== 'Yes') {
+                vscode.window.showInformationMessage('File save operation cancelled.');
+                return;
             }
 
             vscode.window.showInformationMessage(`File saved to Jupyter Server. Path: ${filePath}, API URL: ${apiUrl}, Content: ${content}`);
